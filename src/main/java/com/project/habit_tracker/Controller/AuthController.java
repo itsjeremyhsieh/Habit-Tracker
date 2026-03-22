@@ -78,7 +78,7 @@ public class AuthController {
                     request.getName(),
                     request.getEmail(),
                     request.getPassword(),
-                    resolveClientIp(httpRequest)
+                    httpRequest.getRemoteAddr()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(userToDto(registeredUser));
         } catch (IllegalArgumentException exception) {
@@ -131,20 +131,20 @@ public class AuthController {
         }
         return null;
     }
-
-    private String resolveClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isBlank()) {
-            return xRealIp.trim();
-        }
-
-        return request.getRemoteAddr();
-    }
+//
+//    private String resolveClientIp(HttpServletRequest request) {
+//        String xForwardedFor = request.getHeader("X-Forwarded-For");
+//        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+//            return xForwardedFor.split(",")[0].trim();
+//        }
+//
+//        String xRealIp = request.getHeader("X-Real-IP");
+//        if (xRealIp != null && !xRealIp.isBlank()) {
+//            return xRealIp.trim();
+//        }
+//
+//        return request.getRemoteAddr();
+//    }
 
     private UserResponseDto userToDto(User user) {
         UserResponseDto userDto = new UserResponseDto();
