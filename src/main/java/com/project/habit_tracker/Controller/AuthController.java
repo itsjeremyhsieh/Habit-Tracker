@@ -71,13 +71,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDto> register(@Valid @RequestBody RegisterRequestDto request) {
+    public ResponseEntity<UserResponseDto> register(@Valid @RequestBody RegisterRequestDto request, HttpServletRequest httpRequest) {
         try {
             User registeredUser = userService.registerUser(
                     request.getUsername(),
                     request.getName(),
                     request.getEmail(),
-                    request.getPassword()
+                    request.getPassword(),
+                    resolveClientIp(httpRequest)
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(userToDto(registeredUser));
         } catch (IllegalArgumentException exception) {
@@ -131,6 +132,20 @@ public class AuthController {
         return null;
     }
 
+    private String resolveClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isBlank()) {
+            return xRealIp.trim();
+        }
+
+        return request.getRemoteAddr();
+    }
+
     private UserResponseDto userToDto(User user) {
         UserResponseDto userDto = new UserResponseDto();
         userDto.setId(user.getId());
@@ -143,4 +158,3 @@ public class AuthController {
         return userDto;
     }
 }
-

@@ -47,8 +47,8 @@ public class UserService {
     }
 
     @Transactional
-    public User registerUser(String username, String name, String email, String rawPassword) {
-        
+    public User registerUser(String username, String name, String email, String rawPassword, String clientIp) {
+
         String normalizedUsername = username.trim().toLowerCase();
         String normalizedName = name.trim();
         String normalizedEmail = email.trim().toLowerCase();
@@ -73,19 +73,18 @@ public class UserService {
         User savedUser = userRepository.save(user);
         try {
             auditLogService.logEvent(
-                normalizedUsername, 
-                AuditLogAction.CREATE, 
-                AuditLogEntityType.USER, 
-                normalizedUsername, 
-                "127.0.0.1", 
-                "User registered", 
-                AuditLogResult.SUCCESS, 
-                null, 
+                normalizedUsername,
+                AuditLogAction.CREATE,
+                AuditLogEntityType.USER,
+                normalizedUsername,
+                (clientIp == null || clientIp.isBlank()) ? "unknown" : clientIp,
+                "User registered",
+                AuditLogResult.SUCCESS,
+                null,
                 null
             );
         } catch (Exception e) {
-            log.error("✗✗✗ Error calling auditLogService.logEvent()", e);
-            e.printStackTrace();
+            log.error("Error calling auditLogService.logEvent()", e);
         }
         return savedUser;
     }

@@ -18,7 +18,7 @@ public class AuditLogEventListener {
         this.auditLogRepository = auditLogRepository;
     }
 
-    @TransactionalEventListener(phase= TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase=TransactionPhase.AFTER_COMMIT)
     @Async
     public void handleAuditLogEvent(AuditLog auditLog) {
         try {

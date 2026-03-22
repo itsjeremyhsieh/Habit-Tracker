@@ -29,6 +29,9 @@ class UserserviceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private UserService userService;
 
@@ -39,7 +42,7 @@ class UserserviceTest {
         when(passwordEncoder.encode("plainPassword")).thenReturn("$2a$10$encryptedPassword");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        User savedUser = userService.registerUser(" jeremy ", " Jeremy Chua ", " Jeremy@example.com ", "plainPassword");
+        User savedUser = userService.registerUser(" jeremy ", " Jeremy Chua ", " Jeremy@example.com ", "plainPassword", "192.168.1.20");
 
         ArgumentCaptor<User> savedUserCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(savedUserCaptor.capture());
@@ -60,7 +63,7 @@ class UserserviceTest {
         when(userRepository.findOptionalByUsername("jeremy")).thenReturn(Optional.of(existingUser));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> userService.registerUser("jeremy", "Jeremy", "jeremy@example.com", "plainPassword"));
+                () -> userService.registerUser("jeremy", "Jeremy", "jeremy@example.com", "plainPassword", "192.168.1.20"));
 
         assertTrue(exception.getMessage().contains("Username"));
         verify(passwordEncoder, never()).encode(any());
@@ -75,11 +78,10 @@ class UserserviceTest {
         when(userRepository.findOptionalByEmail("jeremy@example.com")).thenReturn(Optional.of(existingUser));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> userService.registerUser("jeremy", "Jeremy", "jeremy@example.com", "plainPassword"));
+                () -> userService.registerUser("jeremy", "Jeremy", "jeremy@example.com", "plainPassword", "192.168.1.20"));
 
         assertTrue(exception.getMessage().contains("Email"));
         verify(passwordEncoder, never()).encode(any());
         verify(userRepository, never()).save(any(User.class));
     }
 }
-
